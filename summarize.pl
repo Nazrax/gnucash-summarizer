@@ -12,8 +12,8 @@ use Data::Dumper;
 our ($start, $end);
 {
     my (undef, undef, undef, undef, $month, $year) = localtime(time);
-    $start = timelocal(0, 0, 0, 1, $month, $year-1);
-    $end = timelocal(0, 0, 0, 1, $month, $year);
+    $start = timelocal(0, 0, 0, 1, $month-1, $year-1);
+    $end = timelocal(0, 0, 0, 1, $month-1, $year);
 }
 
 my @patterns;
@@ -47,7 +47,7 @@ for my $account (@$accounts) {
     $accounts{$id} = {parent => $parent, type => $type, id => $id, name => $name};
 }
 
-my (%amounts, %income, %months);
+my (%amounts, %income, %months, %mins, %maxes);
 for my $tx (@$transactions) {
     my $rawDate = $tx->{'trn:date-posted'}{'ts:date'};
     my ($year, $month, $day) = ($rawDate =~ /^(\d{4})-(\d{2})-(\d{2}) \d{2}:\d{2}:\d{2} -?\d{4}$/);
@@ -84,7 +84,7 @@ for my $tx (@$transactions) {
     }
 }
 
-print join(',', 'Account Name', 'Average', sort keys %months, 'Total') . "\n";
+print join(',', 'Account Name', 'Average', sort(keys(%months)), 'Total', 'Swing') . "\n";
 
 my %monthlyTotals;
 my $avgTotal = 0;
@@ -103,11 +103,14 @@ for my $acctName (sort keys %amounts) {
 	$count++;
         $monthlyTotals{$shortDate} //= 0;
         $monthlyTotals{$shortDate} += $value;
+        $mins{$acctName} = $value if !defined $mins{$acctName} || $mins{$acctName} > $value;
+        $maxes{$acctName} = $value if !defined $maxes{$acctName} || $maxes{$acctName} < $value;
     }
     my $avg = sprintf("\$%.2f", ($sum / $count));
     $avgTotal += ($sum / $count);
     $totalTotal += $sum;
-    print join(',', $avg, @values, $sum) . "\n";
+    my $swing = sprintf("\$%.2f", ($maxes{$acctName} - $mins{$acctName}));
+    print join(',', $avg, @values, '$' . $sum, $swing) . "\n";
 }
 
 my (@monthlyTotals, @deficits, @incomes);

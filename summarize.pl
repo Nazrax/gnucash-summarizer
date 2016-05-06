@@ -124,9 +124,9 @@ foreach my $shortDate (sort keys %months) {
 
 my $avgIncome = $totalIncome / scalar(keys %months);
 print "\n";
-print join(',', '', sprintf("\$%.2f", $avgIncome), @incomes, $totalIncome) . "\n";
-print join(',', '', sprintf("\$%.2f", $avgTotal), @monthlyTotals, $totalTotal) . "\n";
-print join(',', '', sprintf("\$%.2f", $avgIncome-$avgTotal), @deficits, sprintf("\$%.f", $totalIncome-$totalTotal)) . "\n";
+print join(',', 'Income', sprintf("\$%.2f", $avgIncome), map {"\$$_"} @incomes, $totalIncome) . "\n";
+print join(',', 'Total', sprintf("\$%.2f", $avgTotal), @monthlyTotals, $totalTotal) . "\n";
+print join(',', 'Surplus', sprintf("\$%.2f", $avgIncome-$avgTotal), @deficits, sprintf("\$%.f", $totalIncome-$totalTotal)) . "\n";
 #my $rowCount = scalar(keys %amounts) + 1;
 #my @sums;
 #foreach my $column (qw/B C D E F G H I J K L M N/) {
